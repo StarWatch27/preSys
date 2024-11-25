@@ -1,27 +1,15 @@
 import json
-
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-
+from src.controllers.datasetController import dataset_bp
+from src.controllers.attentionModelController import attention_model_bp
 
 app = Flask(__name__)
-
-db = SQLAlchemy(app)
-
+app.register_blueprint(dataset_bp)
+app.register_blueprint(attention_model_bp)
 
 @app.route('/')
 def hello_world():  # put application's code here
     return 'Hello World!'
-
-
-@app.route("/api/get/<int:id>")
-def testGetPath(id):
-    data = {
-        "id": id,
-        "input1": 1
-    }
-    print(type(id))
-    return json.dumps(data, indent=4)
 
 @app.route("/func/get/<int:id>")
 def testGetPath2(id):
