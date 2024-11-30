@@ -1,11 +1,18 @@
 import json
+import os.path
+
 from flask import Flask
 from src.controllers.datasetController import dataset_bp
 from src.controllers.attentionModelController import attention_model_bp
+from src.controllers.section1Controller import section1Api_bp
 
 app = Flask(__name__)
 app.register_blueprint(dataset_bp)
 app.register_blueprint(attention_model_bp)
+app.register_blueprint(section1Api_bp)
+
+if not os.path.exists("./logs"):
+    os.makedirs("./logs")
 
 @app.route('/')
 def hello_world():  # put application's code here
