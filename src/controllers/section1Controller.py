@@ -1,14 +1,15 @@
 import json
 import os
+import pickle
 import threading
 import time
+import random
 
 from flask import Blueprint, request
 import subprocess
 
 prefix = "section1Api"
 section1Api_bp = Blueprint(prefix, __name__)
-
 
 @section1Api_bp.route(f"/{prefix}/genAdvDataset", methods=['POST'])
 def genAdvDataset():
@@ -121,10 +122,9 @@ def genFocus():
     thread.start()
     return json.dumps({"result": "start"}, indent=4)
 
-
 @section1Api_bp.route(f"/{prefix}/advDetect", methods=['POST'])
 def advDetect():
-    time.sleep(1)
+    time.sleep(0.5)
     recipe = request.json.get("body")
     model_type = recipe["model"]
     raw_dataset_name = recipe["dataset"]
@@ -132,6 +132,7 @@ def advDetect():
     ml_model_dir = "/home/xiongq_2023/proj/HJW/TPGD/HJW/ml_models/20241129_trace_preSys/0_entropy"
     logs_dir = "/home/xiongq_2023/proj/HJW/preSys/logs"
     log_path = f"{logs_dir}/adv_detect/{model_type}-{raw_dataset_name}-{atk_method}.log"
+    pred_data_path = f"/home/xiongq_2023/proj/HJW/TPGD/HJW/adv_detect_results/20241129_trace_preSys/0_entropy/{model_type}-{raw_dataset_name}-{atk_method}.pkl"
 
     """ 检查是否正在执行"""
     result = subprocess.check_output('ps -aux | grep "adv_detect"', shell=True, stderr=subprocess.STDOUT)
@@ -144,18 +145,24 @@ def advDetect():
     """ 检查是否已存在"""
     model_name = f"{model_type}-{raw_dataset_name}-{atk_method}.pkl"  # 是否存在训练好的模型
     ml_model_path = f"{ml_model_dir}/{model_name}"
-    if os.path.exists(ml_model_path):
+    if os.path.exists(pred_data_path):
         print(f"检测模型已存在：{ml_model_path}")
 
-        def rtn_data_1():
+        def rtn_data_1(): # 获取f1,acc,auc
             with open(log_path, "rb") as f:
                 content = f.readlines()[-1].strip().decode('utf-8')
             f1, auc, acc = content.split(" ")[-3:]
             strr = f"f1:{float(f1):.2%}, auc:{float(auc):.2%}, acc:{float(acc):.2%}"
             rtn_data = f"{strr}"
             return rtn_data
+        def rtn_data_2()->list: # 获取测试集的预测结果
+            with open(pred_data_path, "rb") as f:
+                pred_data = pickle.load(f)
+            ids = random.Random(42).sample(range(len(pred_data)), 50)
+            pred_data = [pred_data[_] for _ in ids]
+            return pred_data
 
-        rtn_data = rtn_data_1()
+        rtn_data = rtn_data_2()
         print(rtn_data)
         return json.dumps({"result": "exists", "data": rtn_data}, indent=4)
 

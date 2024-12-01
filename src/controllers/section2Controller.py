@@ -249,7 +249,6 @@ def genMutantFLLogByModelName():
     thread.start()
     return json.dumps({"result": "start"}, indent=4)
 
-
 @section3Api_bp.route(f"/{prefix}/getMutantFLLogByModelName", methods=['POST'])
 def getMutantFLLogByModelName():
     time.sleep(1)
