@@ -5,6 +5,24 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
+# 第四章故障检测与定位的数据集
+class FLDataset(Base):
+    """"""
+    __tablename__ = 'fl_datasets'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)  # 主键
+    name = Column(String(128))  # 数据库名称
+    abs_path = Column(String(128))  # 数据库绝对路径
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "abs_path": self.abs_path
+        }
+
+
+# 第二章对抗检测的数据集
 class Dataset(Base):
     __tablename__ = 'datasets'
 
